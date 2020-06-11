@@ -48,8 +48,8 @@ if __name__ == '__main__':
         elif l1[3] == "Finished":
             countStarts-=1
             if countStarts==0:
-                p.terminate()
-                p2.terminate()
+                # p.terminate()
+                # p2.terminate()
                 shutil.move(collectDir, baseDir + "/resources/data_" + start + "_" + str(users))
                 # shutil.move('/home/stelzer/resources.log', '/home/stelzer/testResults/resources_' + str(users) + '_' + start + '.log')
                 # shutil.move('/home/stelzer/resources.txt', '/home/stelzer/testResults/resources_' + str(users) + '_' + start + '.txt')
