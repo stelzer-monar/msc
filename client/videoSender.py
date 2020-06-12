@@ -33,17 +33,18 @@ class OnlyOne:
         return getattr(self.instance, name)
 
 """
-  x    : video singleton holder
-  tid  : thread id
-  load : cloud offload frequency
+  x        : video singleton holder
+  tid      : thread id
+  load     : cloud offload frequency
+  endpoint : server endpoint to receive the frame ("http://10.3.77.94:8000/uploadFrame")
 """
-def sendAllFrames(x, tid, load):
+def sendAllFrames(x, tid, load, endpoint):
     framesCount=0
     id = str(uuid.uuid4())
     startVideo = time.time()
     for buf in x.framesList: 
         start = time.time()
-        r = requests.post("http://10.3.77.94:8000/uploadFrame", data=buf.tostring(), headers={'id': id, "frame" : str(framesCount), "frameTotal" : str(x.length), "redirect" : "0" if load == 0 or tid % load == 0 else "1" })
+        r = requests.post(endpoint , data=buf.tostring(), headers={'id': id, "frame" : str(framesCount), "frameTotal" : str(x.length), "redirect" : "0" if load == 0 or tid % load == 0 else "1" })
         logger.info(id + " " + str(framesCount) + " " + str(time.time()-start))
         framesCount+=1
     logger.info(id + " video " + str(time.time()-startVideo))

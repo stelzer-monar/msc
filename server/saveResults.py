@@ -43,7 +43,7 @@ if __name__ == '__main__':
         l1 = l.split(' ') 
         if l1[3] == 'Started':
             if countStarts == 0:
-                start = l1[1]
+                start =l1[0] + " " + l1[1]
             countStarts+=1
             users+=1
         elif l1[3] == "Finished":
