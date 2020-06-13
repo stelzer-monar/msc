@@ -5,6 +5,7 @@ import sys
 import subprocess
 import shutil
 import socket
+import rrdtool
 
 def follow(name):
     current = open(name, "r")
@@ -29,32 +30,33 @@ def follow(name):
 
 
 if __name__ == '__main__':
-    # 
     fname = sys.argv[1]
     baseDir = os.getcwd()
     collectDir = "/var/lib/collectd/rrd/" + socket.getfqdn() + "/"
     countStarts = 0
     start = 0
     users = 0
+    duration = {}
     f = open(baseDir + '/results/history.log', "a")
-    # p = subprocess.Popen(['atop', '-w', '/home/stelzer/resources.log', '10'])
-    # p2 = subprocess.Popen(['psrecord', sys.argv[2], '--include-children', '--log', '/home/stelzer/resources.txt', '--interval', '5'])
+    f2 = open(baseDir + '/resources/duration.log', "a")
     for l in follow(fname):
         l1 = l.split(' ') 
         if l1[3] == 'Started':
+            duration[l1[4]] = int(datetime.datetime.strptime(l1[0] + " " + l1[1], '%Y-%m-%d %H:%M:%S,%f').timestamp())
             if countStarts == 0:
                 start =l1[0] + " " + l1[1]
             countStarts+=1
             users+=1
         elif l1[3] == "Finished":
             countStarts-=1
+            duration[l1[4]] = duration[l1[4]] - int(datetime.datetime.strptime(l1[0] + " " + l1[1], '%Y-%m-%d %H:%M:%S,%f').timestamp())
             if countStarts==0:
-                # p.terminate()
-                # p2.terminate()
-                shutil.move(collectDir, baseDir + "/resources/data_" + str(int(datetime.datetime.strptime(start, '%Y-%m-%d %H:%M:%S,%f').timestamp())) + "_" + str(users))
-                # shutil.move('/home/stelzer/resources.log', '/home/stelzer/testResults/resources_' + str(users) + '_' + start + '.log')
-                # shutil.move('/home/stelzer/resources.txt', '/home/stelzer/testResults/resources_' + str(users) + '_' + start + '.txt')
                 f.write(str(users) + " " + start + " " + l1[1] + "\n")
+                avg = 0
+                for d in duration:
+                  avg += duration[d]
+                f2.write(str(users) + " " + str(avg/len(duration)) + "\n")
+                time.sleep(60)
+                shutil.move(collectDir, baseDir + "/resources/data_" + str(int(datetime.datetime.strptime(start, '%Y-%m-%d %H:%M:%S,%f').timestamp())) + "_" + str(users))
                 users=0
-                # p = subprocess.Popen(['atop', '-w', '/home/stelzer/resources.log', '10'])
-                # p2 = subprocess.Popen(['psrecord', sys.argv[2], '--include-children', '--log', '/home/stelzer/resources.txt', '--interval', '5'])
+                duration = {}
