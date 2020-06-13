@@ -37,13 +37,15 @@ if __name__ == '__main__':
     start = 0
     users = 0
     duration = {}
-    f = open(baseDir + '/results/history.log', "a")
-    f2 = open(baseDir + '/resources/duration.log', "a")
+    f = None
+    f2 = None
     for l in follow(fname):
         l1 = l.split(' ') 
         if l1[3] == 'Started':
             duration[l1[4]] = int(datetime.datetime.strptime(l1[0] + " " + l1[1], '%Y-%m-%d %H:%M:%S,%f').timestamp())
             if countStarts == 0:
+                f = open(baseDir + '/results/history.log', "a")
+                f2 = open(baseDir + '/resources/duration.log', "a")
                 start =l1[0] + " " + l1[1]
             countStarts+=1
             users+=1
@@ -60,3 +62,5 @@ if __name__ == '__main__':
                 shutil.move(collectDir, baseDir + "/resources/data_" + str(int(datetime.datetime.strptime(start, '%Y-%m-%d %H:%M:%S,%f').timestamp())) + "_" + str(users))
                 users=0
                 duration = {}
+                f.close()
+                f2.close()
