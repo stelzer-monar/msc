@@ -51,7 +51,7 @@ if __name__ == '__main__':
             users+=1
         elif l1[3] == "Finished":
             countStarts-=1
-            duration[l1[4]] = duration[l1[4]] - int(datetime.datetime.strptime(l1[0] + " " + l1[1], '%Y-%m-%d %H:%M:%S,%f').timestamp())
+            duration[l1[4]] =  int(datetime.datetime.strptime(l1[0] + " " + l1[1], '%Y-%m-%d %H:%M:%S,%f').timestamp()) - duration[l1[4]]
             if countStarts==0:
                 f.write(str(users) + " " + start + " " + l1[1] + "\n")
                 avg = 0
