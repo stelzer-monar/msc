@@ -1,7 +1,6 @@
 from flask import Flask
 from flask_sockets import Sockets
 import logging
-from celery import Celery
 import base64, json, logging, socket, select
 
 UPLOAD_FOLDER = '/home/stelzer/flask/1'

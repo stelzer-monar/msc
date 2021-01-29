@@ -8,12 +8,82 @@ import cv2
 import os
 import sys
 import logging
+import redis
+import numpy as np
+
+def detectMovementJob(id, minarea=500):
+  baseDir = os.getcwd()
+  logging.basicConfig(filename=baseDir + '/detector.log', format='%(asctime)s - %(message)s', level=logging.INFO)
+  logging.info("Started " + id)
+  redisR = redis.StrictRedis()
+  frames = 0
+  # wait for the writing of the total number of frames
+  while not redisR.exists(id + ":total"):
+    time.sleep(0.1)
+  # read the total number of frames
+  frames = int(redisR.get(id + ":total"))
+
+  i = 0
+  while not redisR.exists(id + ":0"):
+    time.sleep(0.1)
+
+  # initialize the first frame
+  firstFrame = cv2.imdecode(np.frombuffer(redisR.get(id + ":0"), np.uint8), cv2.IMREAD_GRAYSCALE)
+  firstFrame = imutils.resize(firstFrame, width=500)
+  firstFrame = cv2.GaussianBlur(firstFrame, (21, 21), 0)
+
+  # create the file to write the frames flaged with movement
+  #framesFile = open(path + "/moveFrames.txt", "a+")
+
+  # loop over the frames of the video
+  while i < frames-1:
+    try:
+      # wait for the next frame to be written
+      if not redisR.exists(id + ":" + str(i)):
+        time.sleep(0.1)
+        logging.info(str(i) + "NE")
+        continue
+      # read frame as grayscale
+      frame = cv2.imdecode(np.frombuffer(redisR.get(id + ":" + str(i)), np.uint8), cv2.IMREAD_GRAYSCALE)
+      
+      move=False
+     
+      # resize the frame and blur it
+      frame = imutils.resize(frame, width=500)
+      # gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+      frame = cv2.GaussianBlur(frame, (21, 21), 0)
+     
+      # compute the absolute difference between the current frame and
+      # first frame
+      frameDelta = cv2.absdiff(firstFrame, frame)
+      thresh = cv2.threshold(frameDelta, 25, 255, cv2.THRESH_BINARY)[1]
+     
+      # dilate the thresholded image to fill in holes, then find contours
+      # on thresholded image
+      thresh = cv2.dilate(thresh, None, iterations=2)
+      cnts = cv2.findContours(thresh.copy(), cv2.RETR_EXTERNAL,
+        cv2.CHAIN_APPROX_SIMPLE)
+      cnts = imutils.grab_contours(cnts)
+     
+      # loop over the contours
+      for c in cnts:
+        # if the contour is too small, ignore it
+        if cv2.contourArea(c) < minarea:
+          continue
+        move=True
+      if move:
+        logging.info(str(i) + "M")
+      else:
+        logging.info(str(i) + "S")
+    except Exception as Argument:
+      logging.exception("Error occured while processing frame " + str(i))  
+      pass
+    i+=1
+  logging.info("Finished " + id)
 
 """
   path : directory where are/will be the frames
 """
-
-
 def detectMovement(path, minarea=500):
   logging.info("Started " + path)
   frames = 0
