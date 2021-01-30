@@ -76,10 +76,10 @@ def main(usersN, endpoint) :
     threadsList = []
     p = j.split(",")
     print(p)
-    #for i in range(int(p[0])):
-    #    a = threading.Thread(target=sendAllFrames, args=(content, i, endpoint))
-    #    threadsList.append(a)
-    #    a.start()
+    for i in range(int(p[0])):
+        a = threading.Thread(target=sendAllFrames, args=(content, i, endpoint))
+        threadsList.append(a)
+        a.start()
     time.sleep(int(p[1]))
 
 if __name__ == "__main__":
