@@ -67,14 +67,20 @@ def read_in_chunks(file_object, chunk_size=1024):
 """
 def main(usersN, endpoint) :
   content = OnlyOne()
-  threadsList = []
   logging.basicConfig(filename='test' + str(usersN) + "_" + str(int(time.time())) + "_" + socket.gethostname() + '.log', level=logging.INFO)
   logger = logging.getLogger(__name__)
 
-  for i in range(int(usersN)):
-      a = threading.Thread(target=sendAllFrames, args=(content, i, endpoint))
-      threadsList.append(a)
-      a.start()
+  params = sys.argv[1].split(';')
+
+  for j in params:
+    threadsList = []
+    p = j.split(",")
+    print(p)
+    #for i in range(int(p[0])):
+    #    a = threading.Thread(target=sendAllFrames, args=(content, i, endpoint))
+    #    threadsList.append(a)
+    #    a.start()
+    time.sleep(int(p[1]))
 
 if __name__ == "__main__":
     main(sys.argv[1], sys.argv[2])
