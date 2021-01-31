@@ -8,6 +8,7 @@ import time
 import sys
 import os
 import socket
+from inspect import getsourcefile
 
 """
   Singleton that breaks video into frames and hold a list of them
@@ -16,7 +17,8 @@ class OnlyOne:
     class __OnlyOne:
         def __init__(self):
            self.framesList = []
-           content_path = os.getcwd() + "/output.mp4"
+           content_path = os.path.realpath(__file__)[:-len(__file__)] + "output.mp4"
+           print(content_path)
            vidObj = cv2.VideoCapture(content_path)
            success = True
            self.length = int(vidObj.get(cv2.CAP_PROP_FRAME_COUNT))
@@ -83,4 +85,5 @@ def main(usersN, endpoint) :
     time.sleep(int(p[1]))
 
 if __name__ == "__main__":
-    main(sys.argv[1], sys.argv[2])
+  print()
+  main(sys.argv[1], sys.argv[2])
